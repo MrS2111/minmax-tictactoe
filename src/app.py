@@ -3,22 +3,22 @@ from flask import Flask, jsonify, request, render_template
 app = Flask(__name__)
 
 # Game state
-board = [""] * 9
-current_player = "X"
+board = [""] * 9 #inisialisasi dengan array board
+current_player = "X" #player menggunakan X
 human_player = "X"
-ai_player = "O"
+ai_player = "O" #AI player menggunakan O
 game_over = False
 winner = None
-history = []  # Menyimpan riwayat langkah-langkah
+history = []  # Menyimpan steps history untuk backtracking
 
-winning_combinations = [
+winning_combinations = [ #array untuk menyimpan combinations board state yang menang.
     [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Horizontal
     [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Vertical
     [0, 4, 8], [2, 4, 6]              # Diagonal
 ]
 
 
-def check_winner(board):
+def check_winner(board): #function untuk cek winning_combinations yang mana board ini match. 
     for combo in winning_combinations:
         if board[combo[0]] and board[combo[0]] == board[combo[1]] == board[combo[2]]:
             return board[combo[0]]
@@ -29,7 +29,7 @@ def empty_spots(board):
     return [i for i, cell in enumerate(board) if cell == ""]
 
 
-def minimax(new_board, player):
+def minimax(new_board, player): #function untuk minimax algorithm
     winner = check_winner(new_board)
     if winner == human_player:
         return {"score": -10}
