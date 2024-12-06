@@ -30,91 +30,98 @@ def empty_spots(board):
 
 
 def minimax(new_board, player): #function untuk minimax algorithm
-    winner = check_winner(new_board)
-    if winner == human_player:
+    winner = check_winner(new_board) #untuk ngecek apakah sudah ada pemenangnya
+    if winner == human_player: #ini kalo kita yang menang
         return {"score": -10}
-    elif winner == ai_player:
+    elif winner == ai_player: #ini kalo AI yang menang
         return {"score": 10}
-    elif not empty_spots(new_board):
+    elif not empty_spots(new_board): #ini kalo seri dan ke-9 kotak di board sudah penuh
         return {"score": 0}
 
-    moves = []
+    moves = [] #penampung (list) untuk nyimpen moves-nya
 
-    for index in empty_spots(new_board):
-        move = {"index": index}
-        new_board[index] = player
+    for index in empty_spots(new_board): #loop untuk ngelewatin semua tempat yang masih kosong
+        move = {"index": index} #nyimpen indesk stepnya 
+        new_board[index] = player #ngasih tanda di boardnya
 
+        #rekursif minimax yg ngitung nilai skor dari step tersebut
         if player == ai_player:
-            result = minimax(new_board, human_player)
+            result = minimax(new_board, human_player) #next turn player
             move["score"] = result["score"]
         else:
-            result = minimax(new_board, ai_player)
+            result = minimax(new_board, ai_player) #next turn AI
             move["score"] = result["score"]
 
-        new_board[index] = ""
-        moves.append(move)
+        new_board[index] = "" #return board setelah evaluasi langkah (backtrack)
+        moves.append(move) #simpan result step ke daftar stepnya
 
+    # cari langkah dengan result/skor  yang terbaik
     if player == ai_player:
-        best_move = max(moves, key=lambda x: x["score"])
+        best_move = max(moves, key=lambda x: x["score"]) #ini AI cari step dengan skor tertinggi
     else:
-        best_move = min(moves, key=lambda x: x["score"])
+        best_move = min(moves, key=lambda x: x["score"]) #player cari step dengan skor terendah
 
-    return best_move
+    return best_move #return langkah terbaik yg ditemukan
 
 
 @app.route("/")
 def index():
+    #route utk menangani step yg dilakukan oleh player
     return render_template("index.html")
 
 
 @app.route("/move", methods=["POST"])
 def move():
+    #rute utk menangani step yg dilakukan player
     global board, current_player, game_over, winner, history
 
+    #kalo game over, return statusnya 
     if game_over:
         return jsonify({"board": board, "game_over": game_over, "winner": winner})
 
+    #get dari permintaan yg biasanya langkah yg dipilih pemain dan ambil indeks yg dipilih dari data
     data = request.get_json()
     index = data.get("index")
 
-    if board[index] == "":
+    if board[index] == "": #jika kotak kosong
         history.append(board[:])  # Simpan state sebelum langkah baru
-        board[index] = human_player
-        winner = check_winner(board)
+        board[index] = human_player #isi kotak dengan simbol player
+        winner = check_winner(board) # cek apakah step ini bikin player menang
         if winner:
-            game_over = True
+            game_over = True #kondisi kalo ada pemenang, game over
             return jsonify({"board": board, "game_over": game_over, "winner": winner})
 
         # Langkah AI
-        ai_choice = minimax(board, ai_player)["index"]
-        board[ai_choice] = ai_player
-        winner = check_winner(board)
+        ai_choice = minimax(board, ai_player)["index"] # AI memilih best step pake Minimax
+        board[ai_choice] = ai_player # ini isi kotak -pake simbol AI
+        winner = check_winner(board) # cek apakah AI menang
         if winner:
-            game_over = True
+            game_over = True # kalo AI menang, game over
 
+    #kembalikan keadaan terbaru board game
     return jsonify({"board": board, "game_over": game_over, "winner": winner})
 
 
 @app.route("/backtrack", methods=["POST"])
-def backtrack():
+def backtrack():#Backtracking untuk kembali ke langkah sebelumnya atau UNDO 
     global board, game_over, winner, history
 
-    if history:
-        board = history.pop()
-        game_over = False
-        winner = None
+    if history:# Ngecek langkah langkahnya ada di dalam history
+        board = history.pop()# Kembali ke keadaan langkah sebelumnya
+        game_over = False # Riset status game over
+        winner = None #Riset pemenangnya
     return jsonify({"board": board, "game_over": game_over, "winner": winner})
 
 
 @app.route("/restart", methods=["POST"])
-def restart():
+def restart():#restart untuk mengulang permainan dari awal
     global board, current_player, game_over, winner, history
-    board = [""] * 9
-    game_over = False
-    winner = None
-    history = []
+    board = [""] * 9 #Riset papan permainan dari awal
+    game_over = False # Riset status game over
+    winner = None #Riset pemenangnya
+    history = [] #riset history permainan
     return jsonify({"board": board, "game_over": game_over, "winner": winner})
 
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     app.run(debug=True)
