@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-800 text-white">
+    <div class="container mx-auto text-center p-10">
+        <h1 class="text-3xl font-bold mb-5">Tic Tac Toe</h1>
+        <div id="status" class="text-lg font-semibold mb-5">Your Turn</div>
+        <div class="grid grid-cols-3 gap-3 w-64 mx-auto" id="board"></div>
+        <div class="mt-5">
+            <button id="restart" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Restart</button>
+            <button id="backtrack" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Backtrack</button>
+        </div>
+    </div>
+
+    <script src="../static/index.js"></script>
+</body>
+</html>
